@@ -38,3 +38,11 @@ export const deleteAtleta = (id) => {
 export const getPaises = () => {
   return apiClient.get("/pais");
 };
+
+/**
+ * Vincula um atleta a uma equipe para um ano de competição.
+ * @param {object} vinculoData - { atletaId, equipeId, anoCompeticao }
+ */
+export const vincularAtletaEquipe = (vinculoData) => {
+  return apiClient.post("/atleta/vincular", vinculoData);
+};

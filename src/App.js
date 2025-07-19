@@ -16,6 +16,8 @@ import Resultados from "./pages/Resultados/Resultados";
 import Pontuacoes from "./pages/Pontuacoes/Pontuacoes";
 import CompeticaoDetalhes from "./pages/Competicoes/CompeticaoDetalhes";
 import Inscricao from "./pages/Inscricao/Inscricao";
+import VinculoAtletaEquipe from "./pages/Vinculo/VinculoAtletaEquipe";
+import GerenciarInscricoes from "./pages/GerenciarInscricoes/GerenciarInscricoes";
 
 const Home = () => (
   <div>
@@ -28,17 +30,18 @@ const Home = () => (
 
 // --- Estilização com Styled Components ---
 const AppContainer = styled.div`
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 `;
 
 const NavBar = styled.nav`
-  background-color: #282c34;
-  padding: 1rem;
-  margin-bottom: 2rem;
+  background-color: #2c3e50;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   ul {
     display: flex;
-    justify-content: center;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -46,26 +49,25 @@ const NavBar = styled.nav`
 `;
 
 const NavItem = styled(NavLink)`
-  color: white;
-  margin: 0 15px;
+  color: #ecf0f1;
+  padding: 20px 25px;
   text-decoration: none;
   font-weight: bold;
-  padding: 5px 10px;
-  border-radius: 5px;
+  display: block;
   transition: background-color 0.3s;
 
   &.active {
-    background-color: #61dafb;
-    color: #282c34;
+    background-color: #3498db;
+    color: white;
   }
 
   &:hover {
-    background-color: #4a4e57;
+    background-color: #34495e;
   }
 `;
 
 const MainContent = styled.main`
-  padding: 0 2rem;
+  padding: 2rem;
 `;
 
 function App() {
@@ -78,7 +80,7 @@ function App() {
               <NavItem to="/">Início</NavItem>
             </li>
             <li>
-              <NavItem to="/inscricao">Inscrições</NavItem>
+              <NavItem to="/vinculo-atleta-equipe">Vincular Atletas</NavItem>
             </li>
             <li>
               <NavItem to="/competicoes">Competições</NavItem>
@@ -101,6 +103,9 @@ function App() {
             <li>
               <NavItem to="/localizacao">Localização</NavItem>
             </li>
+            <li>
+              <NavItem to="/inscricoes">Inscrições</NavItem>
+            </li>
           </ul>
         </NavBar>
 
@@ -120,6 +125,15 @@ function App() {
               element={<CompeticaoDetalhes />}
             />
             <Route path="/inscricao/:competicaoId" element={<Inscricao />} />
+            <Route
+              path="/vinculo-atleta-equipe"
+              element={<VinculoAtletaEquipe />}
+            />
+            <Route path="/inscricoes" element={<GerenciarInscricoes />} />
+            <Route
+              path="/competicao/:id/detalhes"
+              element={<CompeticaoDetalhes />}
+            />
           </Routes>
         </MainContent>
       </AppContainer>

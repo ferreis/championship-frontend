@@ -2,27 +2,84 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-// Supondo que você crie um arquivo para a API de competições
 import { getCompeticaoDetalhes } from "../../api/competicaoApi";
 
 const Container = styled.div`
-  padding: 2rem;
+  padding: 30px;
+  max-width: 960px;
+  margin: 0 auto;
+  font-family: "Arial", sans-serif;
+`;
+
+const Header = styled.div`
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 15px;
+`;
+
+const Title = styled.h1`
+  color: #333;
+  margin-bottom: 5px;
+`;
+
+const Info = styled.p`
+  color: #666;
+  margin-bottom: 8px;
+`;
+
+const ActionButton = styled.button`
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+const SectionTitle = styled.h2`
+  color: #333;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
 `;
 
 const ProvaCard = styled.div`
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+`;
+
+const ProvaTitle = styled.h3`
+  color: #555;
+  margin-top: 0;
+  margin-bottom: 10px;
 `;
 
 const AtletaList = styled.ul`
-  list-style-type: none;
-  padding-left: 1rem;
+  list-style-type: disc;
+  padding-left: 20px;
+`;
+
+const AtletaItem = styled.li`
+  color: #777;
+  margin-bottom: 5px;
+`;
+
+const NoInscritos = styled.p`
+  color: #999;
 `;
 
 const CompeticaoDetalhes = () => {
-  const { id } = useParams(); // Pega o ID da competição da URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [competicao, setCompeticao] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,31 +103,34 @@ const CompeticaoDetalhes = () => {
 
   return (
     <Container>
-      <h1>{competicao.nome}</h1>
-      <p>
-        <strong>Período:</strong>{" "}
-        {new Date(competicao.dataInicio).toLocaleDateString()} a{" "}
-        {new Date(competicao.dataFim).toLocaleDateString()}
-      </p>
+      <Header>
+        <Title>{competicao.nome}</Title>
+        <Info>
+          <strong>Período:</strong>{" "}
+          {new Date(competicao.dataInicio).toLocaleDateString()} a{" "}
+          {new Date(competicao.dataFim).toLocaleDateString()}
+        </Info>
+        <ActionButton onClick={() => navigate(`/inscricao/${id}`)}>
+          Inscrever / Gerenciar Atletas
+        </ActionButton>
+      </Header>
 
-      <button onClick={() => navigate(`/inscricao/${id}`)}>
-        Inscrever / Gerenciar Atletas
-      </button>
-
-      <h2>Provas e Atletas Inscritos</h2>
+      <SectionTitle>Provas e Atletas Inscritos</SectionTitle>
       {competicao.provas.map((prova) => (
         <ProvaCard key={prova.provaId}>
-          <h3>
+          <ProvaTitle>
             {prova.nomeProva} ({prova.modalidade})
-          </h3>
+          </ProvaTitle>
           {prova.atletasInscritos.length > 0 ? (
             <AtletaList>
               {prova.atletasInscritos.map((atleta) => (
-                <li key={atleta.atletaId}>{atleta.nomeAtleta}</li>
+                <AtletaItem key={atleta.atletaId}>
+                  {atleta.nomeAtleta}
+                </AtletaItem>
               ))}
             </AtletaList>
           ) : (
-            <p>Nenhum atleta inscrito nesta prova ainda.</p>
+            <NoInscritos>Nenhum atleta inscrito nesta prova ainda.</NoInscritos>
           )}
         </ProvaCard>
       ))}
