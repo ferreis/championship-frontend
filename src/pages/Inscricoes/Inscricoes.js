@@ -1,5 +1,5 @@
 // src/pages/GerenciarInscricoes/GerenciarInscricoes.js
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
 // Importando todas as APIs necessárias
@@ -10,12 +10,10 @@ import {
   createParticipacao,
   deleteParticipacao,
 } from "../../api/participacaoProvaApi";
-import { Button } from "../../components/Button";
 
 const Container = styled.div`
   max-width: 1200px;
   margin: auto;
-  font-family: "Segoe UI", sans-serif;
 `;
 
 const Title = styled.h1`
@@ -30,6 +28,9 @@ const SelectGrid = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 `;
 
 const FormGroup = styled.div`
@@ -45,6 +46,7 @@ const FormGroup = styled.div`
     border-radius: 5px;
     border: 1px solid #ced4da;
     font-size: 1rem;
+    background-color: white;
   }
 `;
 
@@ -56,10 +58,11 @@ const MainContent = styled.div`
 `;
 
 const Box = styled.div`
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: fit-content;
 `;
 
 const BoxTitle = styled.h2`
@@ -73,9 +76,10 @@ const AtletaCheckbox = styled.div`
   label {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.2s;
     &:hover {
       background-color: #e9ecef;
     }
@@ -104,7 +108,6 @@ const GerenciarInscricoes = () => {
   const [atletasDaEquipe, setAtletasDaEquipe] = useState([]);
   const [inscricoesNaProva, setInscricoesNaProva] = useState([]);
 
-  // Carrega todos os dados básicos na primeira renderização
   useEffect(() => {
     const loadInitialData = async () => {
       try {
@@ -125,20 +128,22 @@ const GerenciarInscricoes = () => {
     loadInitialData();
   }, []);
 
-  // Busca os detalhes da competição (provas e inscritos) quando uma competição é selecionada
+  const fetchDetalhes = async (competicaoId) => {
+    const detalhesRes = await getCompeticaoDetalhes(competicaoId);
+    setProvasDaCompeticao(detalhesRes.data.provas);
+    return detalhesRes.data.provas;
+  };
+
   useEffect(() => {
     if (!selectedCompId) {
       setProvasDaCompeticao([]);
+      setSelectedProvaId("");
       return;
     }
-    const fetchDetalhes = async () => {
-      const detalhesRes = await getCompeticaoDetalhes(selectedCompId);
-      setProvasDaCompeticao(detalhesRes.data.provas);
-    };
-    fetchDetalhes();
+    fetchDetalhes(selectedCompId);
+    setSelectedProvaId("");
   }, [selectedCompId]);
 
-  // Atualiza a lista de atletas inscritos quando a prova muda
   useEffect(() => {
     if (selectedProvaId) {
       const provaAtual = provasDaCompeticao.find(
@@ -150,13 +155,10 @@ const GerenciarInscricoes = () => {
     }
   }, [selectedProvaId, provasDaCompeticao]);
 
-  // Filtra os atletas para mostrar apenas os da equipe selecionada
   useEffect(() => {
     if (selectedEquipeId === "individual") {
-      // "Individual" são atletas sem vínculo com equipe
       setAtletasDaEquipe(atletas.filter((a) => !a.equipeNome));
     } else if (selectedEquipeId) {
-      // Atletas da equipe selecionada
       const equipe = equipes.find((e) => e.id === parseInt(selectedEquipeId));
       setAtletasDaEquipe(atletas.filter((a) => a.equipeNome === equipe?.nome));
     } else {
@@ -170,43 +172,31 @@ const GerenciarInscricoes = () => {
       return;
     }
 
-    if (isChecked) {
-      // Inscrever
-      try {
-        const novaInscricao = await createParticipacao({
+    const participacao = inscricoesNaProva.find(
+      (i) => i.atletaId === atleta.atletaId
+    );
+
+    try {
+      if (isChecked && !participacao) {
+        // Inscrever se não estiver inscrito
+        await createParticipacao({
           atletaId: atleta.atletaId,
           provaId: parseInt(selectedProvaId),
           competicaoId: parseInt(selectedCompId),
           equipeId: atleta.equipeId || null,
         });
-        // Atualiza a lista de inscritos na tela
-        setInscricoesNaProva((prev) => [
-          ...prev,
-          {
-            atletaId: atleta.atletaId,
-            nomeAtleta: atleta.nome,
-            participacaoId: novaInscricao.data.id,
-          },
-        ]);
-      } catch (error) {
-        console.error("Erro ao inscrever atleta", error);
+      } else if (!isChecked && participacao) {
+        // Desinscrever se estiver inscrito
+        await deleteParticipacao(participacao.participacaoId);
       }
-    } else {
-      // Desinscrever
-      const participacao = inscricoesNaProva.find(
-        (i) => i.atletaId === atleta.atletaId
+      // Após a ação, recarrega os detalhes para ter a lista de inscritos mais atual
+      const provasAtualizadas = await fetchDetalhes(selectedCompId);
+      const provaAtual = provasAtualizadas.find(
+        (p) => p.provaId === parseInt(selectedProvaId)
       );
-      if (participacao) {
-        try {
-          await deleteParticipacao(participacao.participacaoId);
-          // Remove da lista de inscritos na tela
-          setInscricoesNaProva((prev) =>
-            prev.filter((i) => i.atletaId !== atleta.atletaId)
-          );
-        } catch (error) {
-          console.error("Erro ao desinscrever atleta", error);
-        }
-      }
+      setInscricoesNaProva(provaAtual ? provaAtual.atletasInscritos : []);
+    } catch (error) {
+      console.error("Erro ao gerenciar inscrição", error);
     }
   };
 
@@ -214,15 +204,15 @@ const GerenciarInscricoes = () => {
 
   return (
     <Container>
-      <Title>Gerenciamento de Inscrições por Prova</Title>
+      <Title>Gerenciamento de Inscrições</Title>
       <SelectGrid>
         <FormGroup>
-          <label>1. Selecione o Torneio (Competição)</label>
+          <label>1. Selecione a Competição</label>
           <select
             value={selectedCompId}
             onChange={(e) => setSelectedCompId(e.target.value)}
           >
-            <option value="">-- Selecione --</option>
+            <option value="">-- Torneios --</option>
             {competicoes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nome}
@@ -237,7 +227,7 @@ const GerenciarInscricoes = () => {
             onChange={(e) => setSelectedProvaId(e.target.value)}
             disabled={!selectedCompId}
           >
-            <option value="">-- Selecione --</option>
+            <option value="">-- Provas --</option>
             {provasDaCompeticao.map((p) => (
               <option key={p.provaId} value={p.provaId}>
                 {p.nomeProva}
@@ -250,14 +240,14 @@ const GerenciarInscricoes = () => {
       {selectedProvaId && (
         <MainContent>
           <Box>
-            <BoxTitle>3. Selecionar Atletas</BoxTitle>
+            <BoxTitle>3. Adicionar Atletas</BoxTitle>
             <FormGroup>
               <label>Filtrar por Equipe</label>
               <select
                 value={selectedEquipeId}
                 onChange={(e) => setSelectedEquipeId(e.target.value)}
               >
-                <option value="">-- Selecione uma Equipe --</option>
+                <option value="">-- Selecione para ver atletas --</option>
                 {equipes.map((e) => (
                   <option key={e.id} value={e.id}>
                     {e.nome}
@@ -267,29 +257,28 @@ const GerenciarInscricoes = () => {
               </select>
             </FormGroup>
 
-            {selectedEquipeId &&
-              atletasDaEquipe.map((atleta) => {
-                const isChecked = inscricoesNaProva.some(
-                  (i) => i.atletaId === atleta.atletaId
-                );
-                return (
-                  <AtletaCheckbox key={atleta.atletaId}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={(e) =>
-                          handleCheckboxChange(atleta, e.target.checked)
-                        }
-                      />
-                      {atleta.nome}
-                    </label>
-                  </AtletaCheckbox>
-                );
-              })}
+            {atletasDaEquipe.map((atleta) => {
+              const isChecked = inscricoesNaProva.some(
+                (i) => i.atletaId === atleta.atletaId
+              );
+              return (
+                <AtletaCheckbox key={atleta.atletaId}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) =>
+                        handleCheckboxChange(atleta, e.target.checked)
+                      }
+                    />
+                    {atleta.nome}
+                  </label>
+                </AtletaCheckbox>
+              );
+            })}
           </Box>
           <Box>
-            <BoxTitle>Atletas Inscritos na Prova</BoxTitle>
+            <BoxTitle>Atletas Inscritos</BoxTitle>
             <ul>
               {inscricoesNaProva.map((insc) => (
                 <li key={insc.participacaoId}>{insc.nomeAtleta}</li>

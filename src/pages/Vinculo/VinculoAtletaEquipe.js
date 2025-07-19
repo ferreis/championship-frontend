@@ -14,7 +14,18 @@ const Container = styled.div`
   margin: auto;
 `;
 
-const FormContainer = styled.div`
+const Header = styled.div`
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+  margin-bottom: 2rem;
+`;
+
+const Title = styled.h1`
+  color: #2c3e50;
+  margin: 0;
+`;
+
+const FormContainer = styled.form`
   background-color: #f8f9fa;
   padding: 2rem;
   border-radius: 8px;
@@ -41,6 +52,16 @@ const FormGroup = styled.div`
     border: 1px solid #ced4da;
     font-size: 1rem;
   }
+`;
+
+const Message = styled.p`
+  padding: 1rem;
+  border-radius: 5px;
+  margin-top: 1rem;
+  color: white;
+  font-weight: bold;
+  background-color: ${(props) =>
+    props.type === "success" ? "#28a745" : "#dc3545"};
 `;
 
 const VinculoAtletaEquipe = () => {
@@ -73,6 +94,7 @@ const VinculoAtletaEquipe = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
+
     if (!atletaId || !equipeId || !anoCompeticao) {
       setError("Todos os campos são obrigatórios.");
       return;
@@ -83,20 +105,27 @@ const VinculoAtletaEquipe = () => {
         equipeId: parseInt(equipeId, 10),
         anoCompeticao: parseInt(anoCompeticao, 10),
       });
-      setSuccess("Atleta vinculado com sucesso!");
-      // Recarrega os dados para mostrar o vínculo na tabela
-      fetchData();
+      setSuccess("Atleta vinculado com sucesso! A tabela será atualizada.");
+      setAtletaId("");
+      setEquipeId("");
+      // Recarrega os dados para mostrar o novo vínculo na tabela
+      setTimeout(fetchData, 1500);
     } catch (err) {
-      setError(err.response?.data?.erro || "Falha ao vincular atleta.");
+      setError(
+        err.response?.data?.erro ||
+          "Falha ao vincular atleta. Verifique se o vínculo já existe."
+      );
     }
   };
 
   return (
     <Container>
-      <h1>Vincular Atleta a uma Equipe</h1>
-      <FormContainer as="form" onSubmit={handleSubmit}>
+      <Header>
+        <Title>Gerenciar Vínculo Atleta-Equipe</Title>
+      </Header>
+      <FormContainer onSubmit={handleSubmit}>
         <FormGroup>
-          <label>Selecionar Atleta</label>
+          <label>Atleta</label>
           <select
             value={atletaId}
             onChange={(e) => setAtletaId(e.target.value)}
@@ -111,7 +140,7 @@ const VinculoAtletaEquipe = () => {
           </select>
         </FormGroup>
         <FormGroup>
-          <label>Selecionar Equipe</label>
+          <label>Equipe</label>
           <select
             value={equipeId}
             onChange={(e) => setEquipeId(e.target.value)}
@@ -137,16 +166,16 @@ const VinculoAtletaEquipe = () => {
         <Button type="submit">Vincular</Button>
       </FormContainer>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>{success}</p>}
+      {error && <Message type="error">{error}</Message>}
+      {success && <Message type="success">{success}</Message>}
 
       <h2>Vínculos Atuais</h2>
       <Table>
         <thead>
           <tr>
             <th>Atleta</th>
-            <th>Equipe</th>
-            <th>Ano</th>
+            <th>Equipe Vinculada</th>
+            <th>Ano do Vínculo</th>
           </tr>
         </thead>
         <tbody>
