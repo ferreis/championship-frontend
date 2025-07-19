@@ -2,11 +2,12 @@
 import apiClient from "./axiosConfig";
 
 /**
- * Busca a lista de atletas já com os dados da equipe e nacionalidade.
+ * Busca a lista de atletas, opcionalmente filtrando por ID da competição.
+ * @param {number} [competicaoId] - O ID da competição para filtrar os vínculos.
  */
-export const getAtletasComEquipes = () => {
-  // O seu controller está configurado para retornar a lista completa neste endpoint
-  return apiClient.get("/atleta/com-equipes");
+export const getAtletasComEquipes = (competicaoId) => {
+  const url = competicaoId ? `/atleta?competicaoId=${competicaoId}` : "/atleta";
+  return apiClient.get(url);
 };
 
 /**
@@ -40,8 +41,8 @@ export const getPaises = () => {
 };
 
 /**
- * Vincula um atleta a uma equipe para um ano de competição.
- * @param {object} vinculoData - { atletaId, equipeId, anoCompeticao }
+ * Vincula um atleta a uma equipe para uma competição específica.
+ * @param {object} vinculoData - { atletaId, equipeId, competicaoId }
  */
 export const vincularAtletaEquipe = (vinculoData) => {
   return apiClient.post("/atleta/vincular", vinculoData);

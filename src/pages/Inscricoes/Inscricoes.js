@@ -1,8 +1,8 @@
-// src/pages/GerenciarInscricoes/GerenciarInscricoes.js
-import React, { useState, useEffect } from "react";
+// src/pages/Inscricoes/Inscricoes.js
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
-// Importando todas as APIs necessárias
 import { getCompeticoes, getCompeticaoDetalhes } from "../../api/competicaoApi";
 import { getEquipes } from "../../api/equipeApi";
 import { getAtletasComEquipes } from "../../api/atletaApi";
@@ -11,18 +11,17 @@ import {
   deleteParticipacao,
 } from "../../api/participacaoProvaApi";
 
+// ... (Seus styled-components continuam os mesmos)
 const Container = styled.div`
   max-width: 1200px;
   margin: auto;
 `;
-
 const Title = styled.h1`
   color: #2c3e50;
   border-bottom: 2px solid #3498db;
   padding-bottom: 10px;
   margin-bottom: 2rem;
 `;
-
 const SelectGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -32,7 +31,6 @@ const SelectGrid = styled.div`
   background-color: #f8f9fa;
   border-radius: 8px;
 `;
-
 const FormGroup = styled.div`
   label {
     display: block;
@@ -49,14 +47,12 @@ const FormGroup = styled.div`
     background-color: white;
   }
 `;
-
 const MainContent = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   margin-top: 1rem;
 `;
-
 const Box = styled.div`
   background-color: #ffffff;
   padding: 1.5rem;
@@ -64,14 +60,12 @@ const Box = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   height: fit-content;
 `;
-
 const BoxTitle = styled.h2`
   font-size: 1.5rem;
   color: #34495e;
   margin-top: 0;
   margin-bottom: 1rem;
 `;
-
 const AtletaCheckbox = styled.div`
   label {
     display: flex;
@@ -91,22 +85,34 @@ const AtletaCheckbox = styled.div`
   }
 `;
 
-const GerenciarInscricoes = () => {
-  // Dados mestre
+const Inscricoes = () => {
+  const { competicaoId: competicaoIdFromUrl } = useParams();
+
   const [competicoes, setCompeticoes] = useState([]);
   const [equipes, setEquipes] = useState([]);
   const [atletas, setAtletas] = useState([]);
 
-  // Estado da UI
-  const [selectedCompId, setSelectedCompId] = useState("");
+  const [selectedCompId, setSelectedCompId] = useState(
+    competicaoIdFromUrl || ""
+  );
   const [selectedProvaId, setSelectedProvaId] = useState("");
   const [selectedEquipeId, setSelectedEquipeId] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Dados derivados
   const [provasDaCompeticao, setProvasDaCompeticao] = useState([]);
   const [atletasDaEquipe, setAtletasDaEquipe] = useState([]);
   const [inscricoesNaProva, setInscricoesNaProva] = useState([]);
+
+  const fetchDetalhes = useCallback(async (competicaoId) => {
+    try {
+      const detalhesRes = await getCompeticaoDetalhes(competicaoId);
+      setProvasDaCompeticao(detalhesRes.data.provas);
+      return detalhesRes.data.provas;
+    } catch (error) {
+      console.error("Erro ao buscar detalhes da competição", error);
+      return [];
+    }
+  }, []);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -119,6 +125,9 @@ const GerenciarInscricoes = () => {
         setCompeticoes(competicoesRes.data);
         setEquipes(equipesRes.data);
         setAtletas(atletasRes.data);
+        if (competicaoIdFromUrl) {
+          await fetchDetalhes(competicaoIdFromUrl);
+        }
       } catch (error) {
         console.error("Falha ao carregar dados iniciais", error);
       } finally {
@@ -126,13 +135,7 @@ const GerenciarInscricoes = () => {
       }
     };
     loadInitialData();
-  }, []);
-
-  const fetchDetalhes = async (competicaoId) => {
-    const detalhesRes = await getCompeticaoDetalhes(competicaoId);
-    setProvasDaCompeticao(detalhesRes.data.provas);
-    return detalhesRes.data.provas;
-  };
+  }, [competicaoIdFromUrl, fetchDetalhes]);
 
   useEffect(() => {
     if (!selectedCompId) {
@@ -142,7 +145,7 @@ const GerenciarInscricoes = () => {
     }
     fetchDetalhes(selectedCompId);
     setSelectedProvaId("");
-  }, [selectedCompId]);
+  }, [selectedCompId, fetchDetalhes]);
 
   useEffect(() => {
     if (selectedProvaId) {
@@ -178,7 +181,6 @@ const GerenciarInscricoes = () => {
 
     try {
       if (isChecked && !participacao) {
-        // Inscrever se não estiver inscrito
         await createParticipacao({
           atletaId: atleta.atletaId,
           provaId: parseInt(selectedProvaId),
@@ -186,10 +188,21 @@ const GerenciarInscricoes = () => {
           equipeId: atleta.equipeId || null,
         });
       } else if (!isChecked && participacao) {
-        // Desinscrever se estiver inscrito
-        await deleteParticipacao(participacao.participacaoId);
+        // ### CORREÇÃO AQUI ###
+        // Adicionamos uma verificação para garantir que o ID da participação existe
+        if (participacao.participacaoId) {
+          await deleteParticipacao(participacao.participacaoId);
+        } else {
+          console.error(
+            "Erro: Tentativa de deletar uma participação sem ID!",
+            participacao
+          );
+          alert(
+            "Ocorreu um erro ao tentar remover a inscrição. Verifique o console para mais detalhes."
+          );
+        }
       }
-      // Após a ação, recarrega os detalhes para ter a lista de inscritos mais atual
+      // Recarrega os detalhes para ter a lista de inscritos mais atual
       const provasAtualizadas = await fetchDetalhes(selectedCompId);
       const provaAtual = provasAtualizadas.find(
         (p) => p.provaId === parseInt(selectedProvaId)
@@ -197,6 +210,7 @@ const GerenciarInscricoes = () => {
       setInscricoesNaProva(provaAtual ? provaAtual.atletasInscritos : []);
     } catch (error) {
       console.error("Erro ao gerenciar inscrição", error);
+      alert("Ocorreu um erro ao processar a inscrição.");
     }
   };
 
@@ -291,4 +305,4 @@ const GerenciarInscricoes = () => {
   );
 };
 
-export default GerenciarInscricoes;
+export default Inscricoes;

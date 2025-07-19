@@ -3,28 +3,28 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { getCompeticaoDetalhes } from "../../api/competicaoApi";
+import { Table } from "../../components/Table"; // Importando nossa tabela estilizada
 
 const Container = styled.div`
-  padding: 30px;
+  padding: 2rem;
   max-width: 960px;
   margin: 0 auto;
-  font-family: "Arial", sans-serif;
 `;
 
 const Header = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
   border-bottom: 2px solid #eee;
-  padding-bottom: 15px;
+  padding-bottom: 1rem;
 `;
 
 const Title = styled.h1`
   color: #333;
-  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
 `;
 
 const Info = styled.p`
   color: #666;
-  margin-bottom: 8px;
+  margin-bottom: 1rem;
 `;
 
 const ActionButton = styled.button`
@@ -36,7 +36,6 @@ const ActionButton = styled.button`
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s ease;
-
   &:hover {
     background-color: #0056b3;
   }
@@ -44,38 +43,27 @@ const ActionButton = styled.button`
 
 const SectionTitle = styled.h2`
   color: #333;
-  margin-top: 25px;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 10px;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
 `;
 
 const ProvaCard = styled.div`
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
   background-color: #f9f9f9;
 `;
 
 const ProvaTitle = styled.h3`
   color: #555;
   margin-top: 0;
-  margin-bottom: 10px;
-`;
-
-const AtletaList = styled.ul`
-  list-style-type: disc;
-  padding-left: 20px;
-`;
-
-const AtletaItem = styled.li`
-  color: #777;
-  margin-bottom: 5px;
+  margin-bottom: 1rem;
 `;
 
 const NoInscritos = styled.p`
   color: #999;
+  font-style: italic;
 `;
 
 const CompeticaoDetalhes = () => {
@@ -87,8 +75,10 @@ const CompeticaoDetalhes = () => {
   useEffect(() => {
     const fetchDetalhes = async () => {
       try {
-        const response = await getCompeticaoDetalhes(id);
-        setCompeticao(response.data);
+        if (id) {
+          const response = await getCompeticaoDetalhes(id);
+          setCompeticao(response.data);
+        }
       } catch (error) {
         console.error("Erro ao buscar detalhes da competição", error);
       } finally {
@@ -110,7 +100,7 @@ const CompeticaoDetalhes = () => {
           {new Date(competicao.dataInicio).toLocaleDateString()} a{" "}
           {new Date(competicao.dataFim).toLocaleDateString()}
         </Info>
-        <ActionButton onClick={() => navigate(`/inscricoes`)}>
+        <ActionButton onClick={() => navigate(`/Inscricoes`)}>
           Inscrever / Gerenciar Atletas
         </ActionButton>
       </Header>
@@ -122,13 +112,22 @@ const CompeticaoDetalhes = () => {
             {prova.nomeProva} ({prova.modalidade})
           </ProvaTitle>
           {prova.atletasInscritos.length > 0 ? (
-            <AtletaList>
-              {prova.atletasInscritos.map((atleta) => (
-                <AtletaItem key={atleta.atletaId}>
-                  {atleta.nomeAtleta}
-                </AtletaItem>
-              ))}
-            </AtletaList>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Nome do Atleta</th>
+                  <th>Equipe</th>
+                </tr>
+              </thead>
+              <tbody>
+                {prova.atletasInscritos.map((atleta) => (
+                  <tr key={atleta.atletaId}>
+                    <td>{atleta.nomeAtleta}</td>
+                    <td>{atleta.equipeNome}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           ) : (
             <NoInscritos>Nenhum atleta inscrito nesta prova ainda.</NoInscritos>
           )}
