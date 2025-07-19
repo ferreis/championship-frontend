@@ -9,9 +9,76 @@ import {
   getCidades,
 } from "../../api/competicaoApi";
 
-// Estilos para o formulário
+// Container principal do formulário
 const FormContainer = styled.div`
-  /* ... estilos do formulário ... */
+  background: white;
+  padding: 25px;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #2c3e50;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+`;
+
+// Estilo para inputs e selects
+const Input = styled.input`
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+`;
+
+const Select = styled.select`
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background: #fff;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+`;
+
+// Estilo para botões
+const Button = styled.button`
+  background-color: ${(props) => (props.cancel ? "#7f8c8d" : "#3498db")};
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: ${(props) => (props.cancel ? "#636e72" : "#2980b9")};
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
 `;
 
 const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
@@ -23,16 +90,13 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
     paisId: "",
     estadoId: "",
     cidadeId: "",
-    // O campo 'local' foi removido para usar a estrutura de Pais/Estado/Cidade
   });
 
-  // Estados para preencher os dropdowns
   const [paises, setPaises] = useState([]);
   const [estados, setEstados] = useState([]);
   const [cidades, setCidades] = useState([]);
 
   useEffect(() => {
-    // Se estiver editando, preenche o formulário com os dados da competição
     if (competicaoToEdit) {
       setFormData({
         ...competicaoToEdit,
@@ -43,7 +107,6 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
       });
     }
 
-    // Carrega os dados para os dropdowns
     const loadDropdownData = async () => {
       try {
         const paisesRes = await getPaises();
@@ -84,7 +147,7 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
       } else {
         await createCompeticao(dataToSend);
       }
-      onSave(); // Notifica o componente pai para recarregar a lista
+      onSave();
     } catch (error) {
       console.error(
         "Falha ao salvar competição",
@@ -103,7 +166,7 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
     <FormContainer>
       <h2>{competicaoToEdit ? "Editar Competição" : "Nova Competição"}</h2>
       <form onSubmit={handleSubmit}>
-        <input
+        <Input
           type="text"
           name="nome"
           value={formData.nome}
@@ -111,21 +174,21 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
           placeholder="Nome da Competição"
           required
         />
-        <input
+        <Input
           type="date"
           name="dataInicio"
           value={formData.dataInicio}
           onChange={handleChange}
           required
         />
-        <input
+        <Input
           type="date"
           name="dataFim"
           value={formData.dataFim}
           onChange={handleChange}
           required
         />
-        <input
+        <Input
           type="number"
           name="ano"
           value={formData.ano}
@@ -134,7 +197,7 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
           required
         />
 
-        <select
+        <Select
           name="paisId"
           value={formData.paisId}
           onChange={handleChange}
@@ -146,9 +209,9 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
               {p.nome}
             </option>
           ))}
-        </select>
+        </Select>
 
-        <select
+        <Select
           name="estadoId"
           value={formData.estadoId}
           onChange={handleChange}
@@ -162,9 +225,9 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
                 {e.nome}
               </option>
             ))}
-        </select>
+        </Select>
 
-        <select
+        <Select
           name="cidadeId"
           value={formData.cidadeId}
           onChange={handleChange}
@@ -178,12 +241,14 @@ const CompeticaoForm = ({ competicaoToEdit, onSave, onCancel }) => {
                 {c.nome}
               </option>
             ))}
-        </select>
+        </Select>
 
-        <button type="submit">Salvar</button>
-        <button type="button" onClick={onCancel}>
-          Cancelar
-        </button>
+        <ButtonGroup>
+          <Button type="submit">Salvar</Button>
+          <Button type="button" cancel onClick={onCancel}>
+            Cancelar
+          </Button>
+        </ButtonGroup>
       </form>
     </FormContainer>
   );

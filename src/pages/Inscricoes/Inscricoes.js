@@ -1,4 +1,4 @@
-// src/pages/Inscricoes/Inscricoes.js
+// src/pages/Inscricoes/Inscricoes.js (ou GerenciarInscricoes.js)
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
@@ -202,7 +202,6 @@ const Inscricoes = () => {
           );
         }
       }
-      // Recarrega os detalhes para ter a lista de inscritos mais atual
       const provasAtualizadas = await fetchDetalhes(selectedCompId);
       const provaAtual = provasAtualizadas.find(
         (p) => p.provaId === parseInt(selectedProvaId)

@@ -2,12 +2,20 @@
 import apiClient from "./axiosConfig";
 
 /**
- * Busca a lista de atletas, opcionalmente filtrando por ID da competição.
- * @param {number} [competicaoId] - O ID da competição para filtrar os vínculos.
+ * Busca a lista de atletas de forma paginada e com filtros.
+ * @param {object} filters - { competicaoId, equipeId, atletaId, pageNumber, pageSize }
  */
-export const getAtletasComEquipes = (competicaoId) => {
-  const url = competicaoId ? `/atleta?competicaoId=${competicaoId}` : "/atleta";
-  return apiClient.get(url);
+export const getAtletasComEquipes = (filters = {}) => {
+  // CORREÇÃO: Garante que apenas filtros com valor sejam enviados para a API
+  const cleanFilters = {};
+  for (const key in filters) {
+    if (filters[key] != null && filters[key] !== "") {
+      cleanFilters[key] = filters[key];
+    }
+  }
+
+  const params = new URLSearchParams(cleanFilters);
+  return apiClient.get(`/atleta?${params.toString()}`);
 };
 
 /**
@@ -31,13 +39,6 @@ export const updateAtleta = (atletaData) => {
  */
 export const deleteAtleta = (id) => {
   return apiClient.delete(`/atleta/${id}`);
-};
-
-/**
- * Busca a lista de todos os países para preencher o formulário.
- */
-export const getPaises = () => {
-  return apiClient.get("/pais");
 };
 
 /**

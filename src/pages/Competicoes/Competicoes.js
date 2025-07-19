@@ -1,25 +1,72 @@
 // src/pages/Competicoes/Competicoes.js
 import React, { useState, useEffect } from "react";
 import { getCompeticoes, deleteCompeticao } from "../../api/competicaoApi";
-import CompeticaoForm from "./CompeticaoForm"; // Importa o formulário
+import CompeticaoForm from "./CompeticaoForm";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-// Estilos para a página e tabela
-const CompeticoesContainer = styled.div`
-  /* ... estilos ... */
+const Container = styled.div`
+  padding: 30px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
 `;
+
+const StyledButton = styled.button`
+  background-color: ${(props) => (props.danger ? "#e74c3c" : "#3498db")};
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  margin: 0 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: ${(props) => (props.danger ? "#c0392b" : "#2980b9")};
+  }
+`;
+
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  margin-top: 15px;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+
   th,
   td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px;
     text-align: left;
   }
+
   th {
+    background-color: #2c3e50;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) {
     background-color: #f2f2f2;
+  }
+
+  a {
+    text-decoration: none;
+    color: #2980b9;
+    font-weight: 500;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 `;
 
@@ -47,7 +94,7 @@ const Competicoes = () => {
     if (window.confirm("Tem certeza que deseja deletar esta competição?")) {
       try {
         await deleteCompeticao(id);
-        fetchCompeticoes(); // Atualiza a lista
+        fetchCompeticoes();
       } catch (err) {
         setError("Falha ao deletar competição.");
         console.error(err);
@@ -58,7 +105,7 @@ const Competicoes = () => {
   const handleSave = () => {
     setShowForm(false);
     setSelectedCompeticao(null);
-    fetchCompeticoes(); // Recarrega os dados após salvar
+    fetchCompeticoes();
   };
 
   if (error) {
@@ -66,7 +113,7 @@ const Competicoes = () => {
   }
 
   return (
-    <CompeticoesContainer>
+    <Container>
       <h1>Gerenciamento de Competições</h1>
 
       {showForm ? (
@@ -80,9 +127,9 @@ const Competicoes = () => {
         />
       ) : (
         <>
-          <button onClick={() => setShowForm(true)}>
-            Adicionar Nova Competição
-          </button>
+          <StyledButton onClick={() => setShowForm(true)}>
+            + Adicionar Nova Competição
+          </StyledButton>
           <Table>
             <thead>
               <tr>
@@ -97,7 +144,6 @@ const Competicoes = () => {
               {competicoes.map((comp) => (
                 <tr key={comp.id}>
                   <td>
-                    {" "}
                     <Link to={`/competicao/${comp.id}/detalhes`}>
                       {comp.nome}
                     </Link>
@@ -106,17 +152,17 @@ const Competicoes = () => {
                   <td>{new Date(comp.dataFim).toLocaleDateString()}</td>
                   <td>{comp.ano}</td>
                   <td>
-                    <button
+                    <StyledButton
                       onClick={() => {
                         setSelectedCompeticao(comp);
                         setShowForm(true);
                       }}
                     >
                       Editar
-                    </button>
-                    <button onClick={() => handleDelete(comp.id)}>
+                    </StyledButton>
+                    <StyledButton danger onClick={() => handleDelete(comp.id)}>
                       Deletar
-                    </button>
+                    </StyledButton>
                   </td>
                 </tr>
               ))}
@@ -124,7 +170,7 @@ const Competicoes = () => {
           </Table>
         </>
       )}
-    </CompeticoesContainer>
+    </Container>
   );
 };
 
