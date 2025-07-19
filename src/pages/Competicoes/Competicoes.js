@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { getCompeticoes, deleteCompeticao } from "../../api/competicaoApi";
 import CompeticaoForm from "./CompeticaoForm"; // Importa o formulário
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 // Estilos para a página e tabela
 const CompeticoesContainer = styled.div`
@@ -95,7 +96,12 @@ const Competicoes = () => {
             <tbody>
               {competicoes.map((comp) => (
                 <tr key={comp.id}>
-                  <td>{comp.nome}</td>
+                  <td>
+                    {" "}
+                    <Link to={`/competicao/${comp.id}/detalhes`}>
+                      {comp.nome}
+                    </Link>
+                  </td>
                   <td>{new Date(comp.dataInicio).toLocaleDateString()}</td>
                   <td>{new Date(comp.dataFim).toLocaleDateString()}</td>
                   <td>{comp.ano}</td>

@@ -8,12 +8,15 @@ import {
 } from "react-router-dom";
 import styled from "styled-components";
 import Competicoes from "./pages/Competicoes/Competicoes";
-import Provas from "./pages/Provas/Provas"; // Importe a página real
+import Provas from "./pages/Provas/Provas";
 import Atletas from "./pages/Atletas/Atletas";
-import Localizacao from "./pages/Localizacao/Localizacao"; // Importe a nova página
+import Localizacao from "./pages/Localizacao/Localizacao";
 import Equipes from "./pages/Equipes/Equipes";
 import Resultados from "./pages/Resultados/Resultados";
 import Pontuacoes from "./pages/Pontuacoes/Pontuacoes";
+import CompeticaoDetalhes from "./pages/Competicoes/CompeticaoDetalhes";
+import Inscricao from "./pages/Inscricao/Inscricao";
+
 const Home = () => (
   <div>
     <h1>Bem-vindo ao Sistema de Gerenciamento de Campeonatos</h1>
@@ -75,6 +78,9 @@ function App() {
               <NavItem to="/">Início</NavItem>
             </li>
             <li>
+              <NavItem to="/inscricao">Inscrições</NavItem>
+            </li>
+            <li>
               <NavItem to="/competicoes">Competições</NavItem>
             </li>
             <li>
@@ -109,6 +115,11 @@ function App() {
             <Route path="/participacoes" element={<Resultados />} />
             <Route path="/pontuacoes" element={<Pontuacoes />} />
             <Route path="/localizacao" element={<Localizacao />} />
+            <Route
+              path="/competicao/:id/detalhes"
+              element={<CompeticaoDetalhes />}
+            />
+            <Route path="/inscricao/:competicaoId" element={<Inscricao />} />
           </Routes>
         </MainContent>
       </AppContainer>

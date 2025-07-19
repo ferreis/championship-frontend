@@ -16,6 +16,13 @@ export const getCompeticaoById = (id) => {
 };
 
 /**
+ * [NOVA FUNÇÃO] Busca os detalhes completos de uma competição, incluindo provas e inscritos.
+ */
+export const getCompeticaoDetalhes = (id) => {
+  return apiClient.get(`/competicao/${id}/detalhes`);
+};
+
+/**
  * Cria uma nova competição.
  * @param {object} competicaoData - Os dados da nova competição.
  */
@@ -29,6 +36,8 @@ export const createCompeticao = (competicaoData) => {
  * @param {object} competicaoData - Os dados a serem atualizados.
  */
 export const updateCompeticao = (competicaoData) => {
+  // Note: O endpoint do seu backend para PATCH não inclui o ID na URL, mas no corpo.
+  // Se você mudar para /competicao/{id}, ajuste aqui.
   return apiClient.patch("/competicao", competicaoData);
 };
 
@@ -40,8 +49,6 @@ export const deleteCompeticao = (id) => {
 };
 
 // --- Funções Auxiliares para preencher os formulários ---
-// Você precisará criar os endpoints e serviços para isso no backend.
-// Por agora, vamos assumir que eles existem.
 
 export const getPaises = () => apiClient.get("/pais");
 export const getEstados = () => apiClient.get("/estado");
