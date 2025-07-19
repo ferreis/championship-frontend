@@ -110,7 +110,7 @@ const CompeticaoDetalhes = () => {
           {new Date(competicao.dataInicio).toLocaleDateString()} a{" "}
           {new Date(competicao.dataFim).toLocaleDateString()}
         </Info>
-        <ActionButton onClick={() => navigate(`/inscricao/${id}`)}>
+        <ActionButton onClick={() => navigate(`/inscricoes`)}>
           Inscrever / Gerenciar Atletas
         </ActionButton>
       </Header>

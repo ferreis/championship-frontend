@@ -15,9 +15,8 @@ import Equipes from "./pages/Equipes/Equipes";
 import Resultados from "./pages/Resultados/Resultados";
 import Pontuacoes from "./pages/Pontuacoes/Pontuacoes";
 import CompeticaoDetalhes from "./pages/Competicoes/CompeticaoDetalhes";
-import Inscricao from "./pages/Inscricao/Inscricao";
 import VinculoAtletaEquipe from "./pages/Vinculo/VinculoAtletaEquipe";
-import GerenciarInscricoes from "./pages/GerenciarInscricoes/GerenciarInscricoes";
+import Inscricoes from "./pages/Inscricoes/Inscricoes";
 
 const Home = () => (
   <div>
@@ -124,12 +123,11 @@ function App() {
               path="/competicao/:id/detalhes"
               element={<CompeticaoDetalhes />}
             />
-            <Route path="/inscricao/:competicaoId" element={<Inscricao />} />
             <Route
               path="/vinculo-atleta-equipe"
               element={<VinculoAtletaEquipe />}
             />
-            <Route path="/inscricoes" element={<GerenciarInscricoes />} />
+            <Route path="/inscricoes" element={<Inscricoes />} />
             <Route
               path="/competicao/:id/detalhes"
               element={<CompeticaoDetalhes />}
