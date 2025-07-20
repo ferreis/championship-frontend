@@ -2,15 +2,14 @@
 import apiClient from "./axiosConfig";
 
 /**
- * Busca todas as provas.
+ * Busca as provas de forma paginada.
  */
-export const getProvas = () => {
-  return apiClient.get("/prova");
+export const getProvas = (pageNumber = 1, pageSize = 10) => {
+  return apiClient.get(`/prova?pageNumber=${pageNumber}&pageSize=${pageSize}`);
 };
 
 /**
  * Cria uma nova prova.
- * @param {object} provaData - Os dados da nova prova, conforme ProvaDto.
  */
 export const createProva = (provaData) => {
   return apiClient.post("/prova", provaData);
@@ -18,11 +17,8 @@ export const createProva = (provaData) => {
 
 /**
  * Atualiza uma prova existente.
- * O ID da prova deve estar em provaData.Id
- * @param {object} provaData - Os dados a serem atualizados, conforme ProvaUpdateDto.
  */
 export const updateProva = (provaData) => {
-  // O endpoint de atualização no seu backend é um PATCH que espera o ID no corpo
   return apiClient.patch("/prova", provaData);
 };
 

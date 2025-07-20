@@ -10,7 +10,7 @@ import { getCompeticoes } from "../../api/competicaoApi";
 import { Table } from "../../components/Table";
 import { Button } from "../../components/Button";
 
-// --- Estilos (sem alterações) ---
+// --- Estilos ---
 const Container = styled.div`
   max-width: 1024px;
   margin: auto;
@@ -66,11 +66,20 @@ const Message = styled.p`
   background-color: ${(props) =>
     props.type === "success" ? "#28a745" : "#dc3545"};
 `;
-const ThWithFilter = styled.th`
+
+// ### ESTILOS CORRIGIDOS PARA O FILTRO ###
+const ThFilterable = styled.th`
+  vertical-align: top;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+`;
+
+const ThHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
 `;
+
 const FilterIcon = styled.span`
   cursor: pointer;
   font-size: 16px;
@@ -80,17 +89,18 @@ const FilterIcon = styled.span`
     color: #2c3e50;
   }
 `;
-const FilterInputContainer = styled.tr`
-  background-color: #ecf0f1 !important;
-  td {
-    padding: 0.5rem 1rem;
-    border-bottom: 2px solid #bdc3c7;
-  }
+
+const FilterWrapper = styled.div`
+  margin-top: 8px;
   select {
     width: 100%;
-    padding: 0.5rem;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #bdc3c7;
   }
 `;
+
+// ### PAGINAÇÃO ESTILIZADA (sem alterações) ###
 const PaginationContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -136,7 +146,9 @@ const ItemsPerPageSelector = styled.div`
 
 // --- Componente ---
 const VinculoAtletaEquipe = () => {
-  // Estados para os dropdowns (Inicializados como arrays vazios)
+  // Todos os `useState` e `useEffect` hooks continuam os mesmos da versão anterior.
+  // ...
+  // Estados para os dropdowns
   const [allAtletas, setAllAtletas] = useState([]);
   const [allEquipes, setAllEquipes] = useState([]);
   const [allCompeticoes, setAllCompeticoes] = useState([]);
@@ -175,8 +187,8 @@ const VinculoAtletaEquipe = () => {
         atletaId: filterAtletaId || undefined,
       };
       const response = await getAtletasComEquipes(filters);
-      setVinculos(response.data.items || []);
-      setTotalItems(response.data.totalCount || 0);
+      setVinculos(response?.data?.items || []);
+      setTotalItems(response?.data?.totalCount || 0);
     } catch (err) {
       setError("Falha ao carregar vínculos.");
       setVinculos([]);
@@ -198,11 +210,14 @@ const VinculoAtletaEquipe = () => {
           getEquipes(),
           getAtletasComEquipes({ pageSize: 1000 }),
         ]);
-        setAllCompeticoes(compRes.data || []);
-        setAllEquipes(equipesRes.data || []);
-        setAllAtletas(atletasRes.data.items || []);
+        setAllCompeticoes(compRes?.data || []);
+        setAllEquipes(equipesRes?.data || []);
+        setAllAtletas(atletasRes?.data?.items || []);
       } catch (err) {
         setError("Falha ao carregar dados para os filtros.");
+        setAllCompeticoes([]);
+        setAllEquipes([]);
+        setAllAtletas([]);
       }
     };
     fetchDropdownData();
@@ -251,7 +266,7 @@ const VinculoAtletaEquipe = () => {
             required
           >
             <option value="">-- Escolha --</option>
-            {(allCompeticoes || []).map((c) => (
+            {allCompeticoes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nome}
               </option>
@@ -266,7 +281,7 @@ const VinculoAtletaEquipe = () => {
             required
           >
             <option value="">-- Escolha --</option>
-            {(allAtletas || []).map((a) => (
+            {allAtletas.map((a) => (
               <option key={a.atletaId} value={a.atletaId}>
                 {a.nome}
               </option>
@@ -281,7 +296,7 @@ const VinculoAtletaEquipe = () => {
             required
           >
             <option value="">-- Escolha --</option>
-            {(allEquipes || []).map((e) => (
+            {allEquipes.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.nome}
               </option>
@@ -298,102 +313,87 @@ const VinculoAtletaEquipe = () => {
 
       <Table>
         <thead>
+          {/* ##### ESTRUTURA DO CABEÇALHO CORRIGIDA ##### */}
           <tr>
-            <ThWithFilter>
-              Atleta{" "}
-              <FilterIcon onClick={() => toggleFilter("atleta")}>
-                &#128269;
-              </FilterIcon>
-            </ThWithFilter>
-            <ThWithFilter>
-              Equipe{" "}
-              <FilterIcon onClick={() => toggleFilter("equipe")}>
-                &#128269;
-              </FilterIcon>
-            </ThWithFilter>
-            <ThWithFilter>
-              Competição{" "}
-              <FilterIcon onClick={() => toggleFilter("competicao")}>
-                &#128269;
-              </FilterIcon>
-            </ThWithFilter>
+            <ThFilterable>
+              <ThHeader>
+                <span>Atleta</span>
+                <FilterIcon onClick={() => toggleFilter("atleta")}>
+                  &#128269;
+                </FilterIcon>
+              </ThHeader>
+              {activeFilter === "atleta" && (
+                <FilterWrapper>
+                  <select
+                    value={filterAtletaId}
+                    onChange={(e) => {
+                      setFilterAtletaId(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="">Todos</option>
+                    {allAtletas.map((a) => (
+                      <option key={a.atletaId} value={a.atletaId}>
+                        {a.nome}
+                      </option>
+                    ))}
+                  </select>
+                </FilterWrapper>
+              )}
+            </ThFilterable>
+            <ThFilterable>
+              <ThHeader>
+                <span>Equipe</span>
+                <FilterIcon onClick={() => toggleFilter("equipe")}>
+                  &#128269;
+                </FilterIcon>
+              </ThHeader>
+              {activeFilter === "equipe" && (
+                <FilterWrapper>
+                  <select
+                    value={filterEquipeId}
+                    onChange={(e) => {
+                      setFilterEquipeId(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="">Todas</option>
+                    {allEquipes.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.nome}
+                      </option>
+                    ))}
+                  </select>
+                </FilterWrapper>
+              )}
+            </ThFilterable>
+            <ThFilterable>
+              <ThHeader>
+                <span>Competição</span>
+                <FilterIcon onClick={() => toggleFilter("competicao")}>
+                  &#128269;
+                </FilterIcon>
+              </ThHeader>
+              {activeFilter === "competicao" && (
+                <FilterWrapper>
+                  <select
+                    value={filterCompId}
+                    onChange={(e) => {
+                      setFilterCompId(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="">Todas</option>
+                    {allCompeticoes.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nome}
+                      </option>
+                    ))}
+                  </select>
+                </FilterWrapper>
+              )}
+            </ThFilterable>
           </tr>
-          {activeFilter && (
-            <FilterInputContainer>
-              <td colSpan={3} style={{ border: "none", padding: 0 }}>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr 1fr",
-                  }}
-                >
-                  <div
-                    style={{
-                      visibility:
-                        activeFilter === "atleta" ? "visible" : "hidden",
-                    }}
-                  >
-                    <select
-                      value={filterAtletaId}
-                      onChange={(e) => {
-                        setFilterAtletaId(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      <option value="">Todos</option>
-                      {allAtletas.map((a) => (
-                        <option key={a.atletaId} value={a.atletaId}>
-                          {a.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div
-                    style={{
-                      visibility:
-                        activeFilter === "equipe" ? "visible" : "hidden",
-                    }}
-                  >
-                    <select
-                      value={filterEquipeId}
-                      onChange={(e) => {
-                        setFilterEquipeId(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      <option value="">Todas</option>
-                      {allEquipes.map((e) => (
-                        <option key={e.id} value={e.id}>
-                          {e.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div
-                    style={{
-                      visibility:
-                        activeFilter === "competicao" ? "visible" : "hidden",
-                    }}
-                  >
-                    <select
-                      value={filterCompId}
-                      onChange={(e) => {
-                        setFilterCompId(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      <option value="">Todas</option>
-                      {allCompeticoes.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </td>
-            </FilterInputContainer>
-          )}
         </thead>
         <tbody>
           {loading ? (
@@ -419,6 +419,8 @@ const VinculoAtletaEquipe = () => {
           )}
         </tbody>
       </Table>
+
+      {/* A paginação continua a mesma */}
       <PaginationContainer>
         <ItemsPerPageSelector>
           <label>Itens por página:</label>
